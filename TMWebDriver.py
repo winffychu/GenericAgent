@@ -243,7 +243,9 @@ class TMWebDriver:
         return rr
     
     def _remote_cmd(self, cmd):
-        return requests.post(self.remote, headers={"Content-Type": "application/json"}, json=cmd).json()
+        try: return requests.post(self.remote, headers={"Content-Type": "application/json"}, json=cmd).json()
+        except (ConnectionError, requests.exceptions.ConnectionError):
+            raise ConnectionError("TMWebDriver master未运行，看tmwebdriver_sop启动master")
 
     def get_all_sessions(self):  
         if self.is_remote:
@@ -277,9 +279,6 @@ class TMWebDriver:
         return self.default_session_id  
     
     def jump(self, url, timeout=10): self.execute_js(f"window.location.href='{url}'", timeout=timeout)
-    def newtab(self, url=None):
-        if url is None: url = "http://www.baidu.com/robots.txt"
-        return self.execute_js(f'GM_openInTab("{url}");')
     
 if __name__ == "__main__":
     driver = TMWebDriver(host='127.0.0.1', port=18765)
